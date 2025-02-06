@@ -604,7 +604,11 @@ async function receiveStream(model: string, stream: any, refConvId?: string): Pr
           }
         }
         if (result.choices && result.choices[0] && result.choices[0].finish_reason === "stop") {
-          data.choices[0].message.content = data.choices[0].message.content.replace(/^\n+/, '').replace(/\[citation:\d+\]/g, '') + (refContent ? `\n\n搜索结果来自：\n${refContent}` : '');
+          data.choices[0].message.content = data.choices[0].message.content.replace(/^\n+/, '').replace(/\[citation:\d+\]/g, '');
+          // 将参考检索内容添加到reasoning_content而不是content
+          if (refContent) {
+            data.choices[0].message.reasoning_content += `\n\n搜索结果来自：\n${refContent}`;
+          }
           resolve(data);
         }
       } catch (err) {
