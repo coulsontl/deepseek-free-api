@@ -509,7 +509,6 @@ function messagesPrepare(messages: any[]): string {
   return mergedBlocks
     .map((block, index) => {
       if (block.role === "assistant") {
-        block.text = block.text.replace(/<details><summary>参考检索<\/summary><pre>检索 .*<\/pre><\/details>/s, ``);
         return `<｜Assistant｜>${block.text}<｜end▁of▁sentence｜>`;
       }
       
@@ -605,9 +604,9 @@ async function receiveStream(model: string, stream: any, refConvId?: string): Pr
         }
         if (result.choices && result.choices[0] && result.choices[0].finish_reason === "stop") {
           data.choices[0].message.content = data.choices[0].message.content.replace(/^\n+/, '').replace(/\[citation:\d+\]/g, '');
-          // 将参考检索内容添加到reasoning_content而不是content
+          // 将参考检索内容添加到reasoning_content
           if (refContent) {
-            data.choices[0].message.reasoning_content += `\n\n搜索结果来自：\n${refContent}`;
+            data.choices[0].message.reasoning_content += `\n\n参考检索页面：\n${refContent}`;
           }
           resolve(data);
         }
@@ -680,7 +679,7 @@ function createTransStream(model: string, stream: any, refConvId: string, endCal
             choices: [
               {
                 index: 0,
-                delta: { role: "assistant", content: `<details><summary>参考检索</summary><pre>` + refContent + `</pre></details>` },
+                delta: { role: "assistant", content: "",  reasoning_content: `\n\n参考检索页面：\n` + refContent + `\n` },
                 finish_reason: null,
               },
             ],
